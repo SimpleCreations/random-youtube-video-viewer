@@ -2,7 +2,7 @@
 
 A web app that lets you cycle through random videos found on YouTube. Written in vanilla JavaScript.
 
-It uses YouTube search API with randomly generated search queries to make the stream of videos as unpredictable as possible. Can be used for entertainment, inspiration or to explore different cultures and langauges.
+It uses YouTube search API with randomly generated search queries to make the stream of videos as unpredictable as possible. Can be used for entertainment, inspiration or to explore different cultures and languages.
 
 ## Try it out
 
@@ -12,7 +12,7 @@ https://vf1n5.csb.app/
 
 1. Create a [YouTube Data API v3 key](https://developers.google.com/youtube/registering_an_application).
 
-   **Note:** the player uses at least 101 quota points per request, allowing to watch not more than 100 videos per day per API key. If you plan to watch more, consider creating several API keys from multiple Google accounts.
+   **Note:** the player uses at least 101 quota points per view, allowing to watch not more than 100 videos per day per API key. If you plan to watch more, consider creating several API keys from multiple Google accounts.
 
 2. Paste the key(s) into the text box under the Settings menu.
 
