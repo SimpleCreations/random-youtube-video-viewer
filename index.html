@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Random YouTube Videos</title>
+    <meta charset="UTF-8" />
+  </head>
+
+  <body>
+    <div id="frame">
+      <div id="player-container">
+        <div id="player">
+          <video id="video" preload="none">
+            <source type="video/youtube" />
+          </video>
+        </div>
+        <div id="api-keys-missing" class="box" hidden>
+          Please provide the list of YouTube API keys<br />
+          (under Settings in the bottom left corner)
+        </div>
+      </div>
+      <div id="controls">
+        <div id="controls-left">
+          <details id="settings">
+            <summary>Settings</summary>
+            <dl id="settings-list" class="box">
+              <dt>YouTube API keys (one per line)</dt>
+              <dd>
+                <textarea id="api-keys" rows="5"></textarea>
+              </dd>
+              <dt>Search query generation algorithm</dt>
+              <dd>
+                <select id="query-generation-algorithm">
+                  <option value="NUMBERS" selected>Numbers</option>
+                  <option value="WIKIPEDIA_WORDS">Wikipedia words</option>
+                </select>
+              </dd>
+            </dl>
+          </details>
+        </div>
+        <button id="next">Load video</button>
+        <div id="controls-right">
+          <details id="spoilers" hidden>
+            <summary>Spoilers</summary>
+            <dl id="spoilers-list" class="box">
+              <dt>
+                Video title
+                <a id="translate-title" class="translate-link" target="_blank"
+                  >Translate</a
+                >
+              </dt>
+              <dd id="title"></dd>
+              <dt>
+                Search query
+                <a
+                  id="translate-search-query"
+                  class="translate-link"
+                  target="_blank"
+                  >Translate</a
+                >
+              </dt>
+              <dd id="search-query"></dd>
+            </dl>
+          </details>
+          <a id="open-on-youtube" target="_blank" hidden>Open on YouTube</a>
+        </div>
+      </div>
+    </div>
+
+    <script src="src/index.js"></script>
+  </body>
+</html>
