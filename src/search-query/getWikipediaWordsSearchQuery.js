@@ -1,12 +1,20 @@
 import countBy from "lodash.countby";
 
-import { getSampleWeighted } from "./util";
+import { getSampleWeighted } from "../util";
 import { WIKIPEDIAS, WIKIPEDIAS_ENTRIES } from "./wikipedias";
 
-const COMMON_API_PARAMS = {
-  origin: "*",
-  format: "json"
-};
+async function queryWikipediaApi(languageCode, params) {
+  const response = await fetch(
+    `https://${languageCode}.wikipedia.org/w/api.php?` +
+      new URLSearchParams({
+        ...params,
+        origin: "*",
+        format: "json"
+      })
+  );
+  if (!response.ok) throw new Error("Failed to query Wikipedia API");
+  return await response.json();
+}
 
 const WORD_REGEX = /[\p{L}\p{M}]+/gu;
 
@@ -15,34 +23,21 @@ export default async function getWikipediaWordsSearchQuery() {
     WIKIPEDIAS_ENTRIES,
     ([, { weight }]) => weight
   );
-  const apiEndpoint = `https://${code}.wikipedia.org/w/api.php?`;
 
-  const queryResponse = await fetch(
-    apiEndpoint +
-      new URLSearchParams({
-        ...COMMON_API_PARAMS,
-        action: "query",
-        generator: "random",
-        grnnamespace: 0,
-        prop: "revisions",
-        grnlimit: 1
-      })
-  );
-  if (!queryResponse.ok) throw new Error("Failed to fetch random page ID");
-  const queryData = await queryResponse.json();
+  const queryData = await queryWikipediaApi(code, {
+    action: "query",
+    generator: "random",
+    grnnamespace: 0,
+    prop: "revisions",
+    grnlimit: 1
+  });
   const pageId = +Object.keys(queryData["query"]["pages"])[0];
 
-  const parseResponse = await fetch(
-    apiEndpoint +
-      new URLSearchParams({
-        ...COMMON_API_PARAMS,
-        action: "parse",
-        pageid: pageId,
-        prop: "text"
-      })
-  );
-  if (!parseResponse.ok) throw new Error("Failed to fetch parsed text");
-  const parseData = await parseResponse.json();
+  const parseData = await queryWikipediaApi(code, {
+    action: "parse",
+    pageid: pageId,
+    prop: "text"
+  });
   const html = parseData["parse"]["text"]["*"];
 
   const dummy = document.createElement("div");
@@ -57,7 +52,7 @@ export default async function getWikipediaWordsSearchQuery() {
 
   const text = dummy.textContent;
   const words = text.match(WORD_REGEX);
-  if (words == null) return await getWikipediaWordsQuery();
+  if (words == null) return await getWikipediaWordsSearchQuery();
 
   const freqDict = countBy(words);
   const freqs = Object.values(freqDict);

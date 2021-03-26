@@ -1,244 +1,126 @@
-import "mediaelement/build/renderers/youtube";
-import "mediaelement/full";
-import "mediaelement/build/mediaelementplayer.css";
-import sample from "lodash.sample";
-import { decodeHTML } from "entities";
 import store from "store";
 
 import "./styles.css";
-import { YOUTUBE_API_BASE } from "./config";
 import { getTranslateLink } from "./util";
-import getNumbersSearchQuery from "./getNumbersSearchQuery";
-import getWikipediaWordsSearchQuery from "./getWikipediaWordsSearchQuery";
+import Player from "./Player";
+import Loader, { MissingApiKeysError } from "./Loader";
 
-const playerContainerDiv = document.querySelector("#player-container");
-const playerDiv = document.querySelector("#player");
-const videoSource = document.querySelector("#video source");
-const settings = document.querySelector("#settings");
-const queryGenerationAlgorithmSelect = document.querySelector(
+const playerContainerElement = document.querySelector("#player-container");
+const playerElement = document.querySelector("#player");
+const settingsElement = document.querySelector("#settings");
+const queryGenerationAlgorithmSelectElement = document.querySelector(
   "#query-generation-algorithm"
 );
-const apiKeysField = document.querySelector("#api-keys");
-const nextButton = document.querySelector("#next");
-const openOnYoutubeLink = document.querySelector("#open-on-youtube");
-const spoilers = document.querySelector("#spoilers");
-const titleSpoiler = document.querySelector("#title");
-const titleTranslateLink = document.querySelector("#translate-title");
-const searchQuerySpoiler = document.querySelector("#search-query");
-const searchQueryTranslateLink = document.querySelector(
+const apiKeysFieldElement = document.querySelector("#api-keys");
+const nextButtonElement = document.querySelector("#next");
+const openOnYoutubeLinkElement = document.querySelector("#open-on-youtube");
+const spoilersElement = document.querySelector("#spoilers");
+const titleElement = document.querySelector("#title");
+const titleTranslateLinkElement = document.querySelector("#translate-title");
+const searchQueryElement = document.querySelector("#search-query");
+const searchQueryTranslateLinkElement = document.querySelector(
   "#translate-search-query"
 );
-const apiKeysMissingDiv = document.querySelector("#api-keys-missing");
+const apiKeysMissingElement = document.querySelector("#api-keys-missing");
 
-let apiKeys;
+// Initialize Player and Loader
+const player = new Player(playerElement);
+const loader = new Loader(player);
 
-async function getSearchQuery() {
-  switch (queryGenerationAlgorithmSelect.value) {
-    case "NUMBERS":
-      return getNumbersSearchQuery();
-    case "WIKIPEDIA_WORDS":
-      return await getWikipediaWordsSearchQuery();
-    default:
-      throw new Error("Unreachable code");
+// Handle video info
+loader.on("infoReady", ({ title, searchQuery }) => {
+  searchQueryElement.textContent = searchQuery;
+  searchQueryTranslateLinkElement.href = getTranslateLink(searchQuery);
+  titleElement.textContent = title;
+  titleTranslateLinkElement.href = getTranslateLink(title);
+});
+
+// Handle video link
+loader.on("videoReady", ({ link }) => {
+  openOnYoutubeLinkElement.href = link;
+});
+
+// Collapse <details> on outside click
+document.addEventListener("click", ({ target }) => {
+  if (
+    settingsElement.open &&
+    settingsElement !== target &&
+    !settingsElement.contains(target)
+  ) {
+    settingsElement.open = false;
   }
-}
-
-async function queryApi(method, params) {
-  const apiKey = sample(apiKeys);
-  const response = await fetch(
-    new URL(
-      method +
-        "?" +
-        new URLSearchParams({
-          ...params,
-          key: apiKey,
-          alt: "json"
-        }),
-      YOUTUBE_API_BASE
-    ).href
-  );
-  const data = await response.json();
-  if (!response.ok) {
-    if (
-      data["error"]?.["errors"]?.[0]?.["reason"] === "quotaExceeded" &&
-      apiKeys.length > 1
-    ) {
-      apiKeys = apiKeys.filter((key) => key !== apiKey);
-      return await queryApi(method, params);
-    }
-    throw new Error("YouTube API request failed");
+  if (
+    spoilersElement.open &&
+    spoilersElement !== target &&
+    !spoilersElement.contains(target)
+  ) {
+    spoilersElement.open = false;
   }
-  return data;
-}
+});
 
-async function getVideoId() {
-  const searchQuery = await getSearchQuery();
-  searchQuerySpoiler.textContent = searchQuery;
-  searchQueryTranslateLink.href = getTranslateLink(searchQuery);
-  const data = await queryApi("search", {
-    q: searchQuery,
-    part: "snippet",
-    type: "video",
-    order: "date",
-    videoDimension: "2d",
-    videoEmbeddable: true,
-    maxResults: 10
-  });
-  const items = data["items"];
-  if (!items.length) return await getVideoId();
-  const item = sample(items);
-  const videoId = item["id"]["videoId"];
-  const title = decodeHTML(item["snippet"]["title"]);
-  titleSpoiler.textContent = title;
-  titleTranslateLink.href = getTranslateLink(title);
-  return videoId;
-}
+// Handle API keys update
+const apiKeys = store.get("apiKeys", []);
+loader.setApiKeys(apiKeys);
+apiKeysFieldElement.value = apiKeys.join("\n");
+apiKeysMissingElement.hidden = apiKeys.length > 0;
+apiKeysFieldElement.addEventListener("change", () => {
+  const apiKeys = apiKeysFieldElement.value
+    .trim()
+    .split("\n")
+    .map((key) => key.trim())
+    .filter((key) => key.length > 0);
+  loader.setApiKeys(apiKeys);
+  store.set("apiKeys", apiKeys);
+  apiKeysMissingElement.hidden = apiKeys.length > 0;
+});
 
-function checkApiKeys() {
-  const apiKeysPresent = apiKeys.length > 0;
-  apiKeysMissingDiv.hidden = apiKeysPresent;
-  return apiKeysPresent;
-}
+// Handle search query generation algorithm update
+const queryGenerationAlgorithm = store.get(
+  "queryGenerationAlgorithm",
+  "NUMBERS"
+);
+loader.setSearchQueryGenerationAlgorithm(queryGenerationAlgorithm);
+queryGenerationAlgorithmSelectElement.value = queryGenerationAlgorithm;
+queryGenerationAlgorithmSelectElement.addEventListener("change", () => {
+  const value = queryGenerationAlgorithmSelectElement.value;
+  loader.setSearchQueryGenerationAlgorithm(value);
+  store.set("queryGenerationAlgorithm", value);
+});
 
-let player;
-let videoAspectRatio;
-
-async function nextVideo() {
-  if (!checkApiKeys()) return;
-  nextButton.disabled = true;
-  openOnYoutubeLink.hidden = true;
-  spoilers.hidden = true;
-  spoilers.open = false;
+// Handle next video button click
+nextButtonElement.addEventListener("click", async () => {
+  nextButtonElement.disabled = true;
+  openOnYoutubeLinkElement.hidden = true;
+  spoilersElement.hidden = true;
   try {
-    const videoId = await getVideoId();
-    const link = "https://www.youtube.com/watch?v=" + videoId;
-    if (player) {
-      player.setSrc(link);
-      player.setCurrentTime(0);
-      player.play();
+    if (!player.isLoaded()) {
+      await loader.loadNextVideo();
+      player.load();
+      nextButtonElement.textContent = "Next video";
     } else {
-      videoSource.src = link;
+      await loader.loadNextVideo();
     }
-    openOnYoutubeLink.href = link;
-    openOnYoutubeLink.hidden = false;
-    spoilers.hidden = false;
-    resetVideoDimensions();
-    fetchVideoDimensions(videoId);
+    openOnYoutubeLinkElement.hidden = false;
+    spoilersElement.hidden = false;
+  } catch (error) {
+    if (error instanceof MissingApiKeysError) return;
+    throw error;
   } finally {
-    nextButton.disabled = false;
+    nextButtonElement.disabled = false;
+  }
+});
+
+// Handle window resize
+// Firefox lacks support for `aspect-ratio` CSS property
+const supportsCssAspectRatio = CSS.supports("aspect-ratio", "1 / 1");
+function setPlayerContainerHeight() {
+  if (!supportsCssAspectRatio) {
+    const { offsetWidth } = playerContainerElement;
+    playerElement.style.height = offsetWidth / (16 / 9) + "px";
   }
 }
-
-function getVideoFrame() {
-  return playerDiv.querySelector("iframe");
-}
-
-function setVideoFrameSize() {
-  if (videoAspectRatio == null) return;
-  const frame = getVideoFrame();
-  if (!frame) return;
-  const { width: playerWidth, height: playerHeight } = player;
-  if (videoAspectRatio < playerWidth / playerHeight) {
-    frame.style.width = playerHeight * videoAspectRatio + "px";
-  } else {
-    frame.style.removeProperty("width");
-  }
-}
-
-function resetVideoDimensions() {
-  videoAspectRatio = undefined;
-  /* eslint-disable no-unused-expressions */
-  getVideoFrame()?.style.removeProperty("width");
-}
-
-async function fetchVideoDimensions(videoId) {
-  const data = await queryApi("videos", {
-    id: videoId,
-    part: "player",
-    maxHeight: 720
-  });
-  const playerData = data["items"][0]["player"];
-  if (playerData["embedWidth"] && playerData["embedHeight"]) {
-    videoAspectRatio = +playerData["embedWidth"] / +playerData["embedHeight"];
-    setVideoFrameSize();
-  }
-}
-
-function setPlayerSize() {
-  if (!player) return;
-  const { offsetWidth, offsetHeight } = playerDiv;
-  player.setPlayerSize(offsetWidth, offsetHeight);
-  setVideoFrameSize();
-}
-
-async function loadPlayer() {
-  if (!checkApiKeys()) return;
-  await nextVideo();
-  /* eslint-disable */
-  player = new MediaElementPlayer("video", {
-    renderers: ["youtube_iframe"],
-    youtube: {
-      modestbranding: 1,
-      autohide: 1
-    }
-  });
-  setPlayerSize();
-  player.media.addEventListener("loadedmetadata", setVideoFrameSize);
-}
-
-function init() {
-  document.addEventListener("click", ({ target }) => {
-    if (settings.open && settings !== target && !settings.contains(target)) {
-      settings.open = false;
-    }
-    if (spoilers.open && spoilers !== target && !spoilers.contains(target)) {
-      spoilers.open = false;
-    }
-  });
-
-  apiKeys = store.get("apiKeys", []);
-  apiKeysField.value = apiKeys.join("\n");
-  checkApiKeys();
-  apiKeysField.addEventListener("change", () => {
-    apiKeys = apiKeysField.value
-      .trim()
-      .split("\n")
-      .map((key) => key.trim())
-      .filter((key) => key.length > 0);
-    store.set("apiKeys", apiKeys);
-    checkApiKeys();
-  });
-
-  queryGenerationAlgorithmSelect.value = store.get(
-    "queryGenerationAlgorithm",
-    "NUMBERS"
-  );
-  queryGenerationAlgorithmSelect.addEventListener("change", () => {
-    store.set("queryGenerationAlgorithm", queryGenerationAlgorithmSelect.value);
-  });
-
-  nextButton.addEventListener("click", async () => {
-    if (!player) {
-      await loadPlayer();
-      nextButton.textContent = "Next video";
-    } else {
-      await nextVideo();
-    }
-  });
-
-  // Firefox lacks support for `aspect-ratio` CSS property
-  const supportsCssAspectRatio = CSS.supports("aspect-ratio", "1 / 1");
-  function setPlayerContainerHeight() {
-    if (!supportsCssAspectRatio) {
-      const { offsetWidth } = playerContainerDiv;
-      playerDiv.style.height = offsetWidth / (16 / 9) + "px";
-    }
-  }
-  addEventListener("resize", () => {
-    setPlayerContainerHeight();
-    setPlayerSize();
-  });
+window.addEventListener("resize", () => {
   setPlayerContainerHeight();
-}
-
-init();
+  if (player.isLoaded()) player.setSize();
+});
+setPlayerContainerHeight();

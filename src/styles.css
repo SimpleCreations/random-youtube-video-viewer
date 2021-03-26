@@ -158,7 +158,7 @@ details dd:last-child {
 .mejs__overlay-button,
 .mejs__overlay-loading-bg-img,
 .mejs__button > button {
-  background-image: url("https://cdn.jsdelivr.net/npm/mediaelement@4.2.16/build/mejs-controls.svg");
+  background-image: url("https://cdn.jsdelivr.net/npm/mediaelement@4.2.16/build/mejs-controls.svg") !important;
 }
 
 /* Firefox lacks support for `color-scheme` property */

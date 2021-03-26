@@ -9,15 +9,17 @@
   },
   "dependencies": {
     "entities": "2.2.0",
+    "events": "3.3.0",
     "lodash.countby": "4.6.0",
     "lodash.sample": "4.2.1",
     "lodash.sum": "4.0.2",
     "mediaelement": "4.2.16",
-    "parcel-bundler": "^1.6.1",
     "store": "2.0.12"
   },
   "devDependencies": {
-    "@babel/core": "7.2.0"
+    "@babel/core": "7.13.2",
+    "@babel/plugin-proposal-class-properties": "7.13.0",
+    "parcel-bundler": "^1.6.1"
   },
   "resolutions": {
     "@babel/preset-env": "7.13.8"
