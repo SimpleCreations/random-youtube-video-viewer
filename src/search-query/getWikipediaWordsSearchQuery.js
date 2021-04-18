@@ -1,7 +1,9 @@
+import sample from "lodash.sample";
 import countBy from "lodash.countby";
 
 import { getSampleWeighted } from "../util";
 import { WIKIPEDIAS, WIKIPEDIAS_ENTRIES } from "./wikipedias";
+import { MOST_FREQUENT_WORDS_BY_SCRIPT } from "./freqDictionary";
 
 async function queryWikipediaApi(languageCode, params) {
   const response = await fetch(
@@ -17,9 +19,10 @@ async function queryWikipediaApi(languageCode, params) {
 }
 
 const WORD_REGEX = /[\p{L}\p{M}]+/gu;
+const SHORT_LATIN_WORD_REGEX = /^\p{Script=Latin}{0,2}$/u;
 
 export default async function getWikipediaWordsSearchQuery() {
-  const [code] = getSampleWeighted(
+  const [code, { script }] = getSampleWeighted(
     WIKIPEDIAS_ENTRIES,
     ([, { weight }]) => weight
   );
@@ -54,26 +57,38 @@ export default async function getWikipediaWordsSearchQuery() {
   const words = text.match(WORD_REGEX);
   if (words == null) return await getWikipediaWordsSearchQuery();
 
-  const freqDict = countBy(words);
-  const freqs = Object.values(freqDict);
-  const minFreq = wordFrequencyToWeight(Math.min(...freqs));
-  const maxFreq = wordFrequencyToWeight(Math.max(...freqs));
-  const weightsEntries = Object.entries(freqDict);
-  for (const entry of weightsEntries) {
-    entry[1] = maxFreq - wordFrequencyToWeight(entry[1]) + minFreq;
+  let selectedWordIndex;
+  const frequentWords = MOST_FREQUENT_WORDS_BY_SCRIPT[script];
+  if (frequentWords) {
+    const wordsEntries = Array.from(words.entries());
+    let filteredWordsEntries = wordsEntries.filter(([, word]) => {
+      if (script === "latin" && SHORT_LATIN_WORD_REGEX.test(word)) return false;
+      return !frequentWords.has(word.toLowerCase());
+    });
+    if (filteredWordsEntries.length === 0) filteredWordsEntries = wordsEntries;
+    [selectedWordIndex] = sample(filteredWordsEntries);
+  } else {
+    const freqDict = countBy(words);
+    const freqs = Object.values(freqDict);
+    const minFreq = wordFrequencyToWeight(Math.min(...freqs));
+    const maxFreq = wordFrequencyToWeight(Math.max(...freqs));
+    const weightsEntries = Object.entries(freqDict);
+    for (const entry of weightsEntries) {
+      entry[1] = maxFreq - wordFrequencyToWeight(entry[1]) + minFreq;
+    }
+    const [selectedWord] = getSampleWeighted(
+      weightsEntries,
+      ([, weight]) => weight
+    );
+    selectedWordIndex = words.indexOf(selectedWord);
   }
 
-  const numberOfWords = WIKIPEDIAS[code].words;
-  const [selectedWord] = getSampleWeighted(
-    weightsEntries,
-    ([, weight]) => weight
-  );
-  const selectedWordIndex = words.indexOf(selectedWord);
+  const numberOfWordsToSelect = WIKIPEDIAS[code].words;
   const selectedWords = words.slice(
     selectedWordIndex,
-    selectedWordIndex + numberOfWords
+    selectedWordIndex + numberOfWordsToSelect
   );
-  const elementsLeft = numberOfWords - selectedWords.length;
+  const elementsLeft = numberOfWordsToSelect - selectedWords.length;
   if (elementsLeft > 0) {
     selectedWords.unshift(
       ...words.slice(

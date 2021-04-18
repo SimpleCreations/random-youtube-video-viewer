@@ -11,6 +11,8 @@
     "entities": "2.2.0",
     "events": "3.3.0",
     "lodash.countby": "4.6.0",
+    "lodash.groupby": "4.6.0",
+    "lodash.mapvalues": "4.6.0",
     "lodash.sample": "4.2.1",
     "lodash.sum": "4.0.2",
     "mediaelement": "4.2.16",
