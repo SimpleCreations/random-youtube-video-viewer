@@ -6,7 +6,7 @@ It uses YouTube search API with randomly generated search queries to make the st
 
 ## Try it out
 
-https://vf1n5.csb.app/
+https://4wtrnw-5173.csb.app/
 
 ## Getting started
 
