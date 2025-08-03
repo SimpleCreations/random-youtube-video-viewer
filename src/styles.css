@@ -160,21 +160,3 @@ details dd:last-child {
 .mejs__button > button {
   background-image: url("https://cdn.jsdelivr.net/npm/mediaelement@4.2.16/build/mejs-controls.svg") !important;
 }
-
-/* Firefox lacks support for `color-scheme` property */
-@supports not (color-scheme: dark) {
-  button {
-    background: var(--box-background);
-    border: 1px solid var(--box-border);
-    border-radius: 2px;
-    color: inherit;
-  }
-  a {
-    color: var(--link-fallback);
-  }
-}
-
-/* Hide CodeSandbox button :P */
-[id*="open-sandbox"] {
-  display: none;
-}

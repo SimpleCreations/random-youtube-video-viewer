@@ -1,12 +1,7 @@
 {
   "name": "random-youtube-video-viewer",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.html",
-  "scripts": {
-    "start": "parcel index.html --open",
-    "build": "parcel build index.html"
-  },
+  "license": "UNLICENSED",
   "dependencies": {
     "entities": "2.2.0",
     "events": "3.3.0",
@@ -19,12 +14,11 @@
     "store": "2.0.12"
   },
   "devDependencies": {
-    "@babel/core": "7.13.2",
-    "@babel/plugin-proposal-class-properties": "7.13.0",
-    "parcel-bundler": "^1.6.1"
+    "vite": "6.3.5"
   },
-  "resolutions": {
-    "@babel/preset-env": "7.13.8"
-  },
-  "keywords": []
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  }
 }

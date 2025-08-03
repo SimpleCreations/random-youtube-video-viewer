@@ -1,6 +1,5 @@
 import store from "store";
 
-import "./styles.css";
 import { getTranslateLink } from "./util";
 import Player from "./Player";
 import Loader, { MissingApiKeysError } from "./Loader";
@@ -111,16 +110,6 @@ nextButtonElement.addEventListener("click", async () => {
 });
 
 // Handle window resize
-// Firefox lacks support for `aspect-ratio` CSS property
-const supportsCssAspectRatio = CSS.supports("aspect-ratio", "1 / 1");
-function setPlayerContainerHeight() {
-  if (!supportsCssAspectRatio) {
-    const { offsetWidth } = playerContainerElement;
-    playerElement.style.height = offsetWidth / (16 / 9) + "px";
-  }
-}
 window.addEventListener("resize", () => {
-  setPlayerContainerHeight();
   if (player.isLoaded()) player.setSize();
 });
-setPlayerContainerHeight();
