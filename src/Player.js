@@ -23,14 +23,14 @@ export default class Player {
       renderers: ["youtube_iframe"],
       youtube: {
         modestbranding: 1,
-        autohide: 1
-      }
+        autohide: 1,
+      },
     });
     this.setSize();
-    this.#player.media.addEventListener(
-      "loadedmetadata",
-      this.setVideoFrameSize.bind(this)
-    );
+    this.#player.media.addEventListener("loadedmetadata", () => {
+      this.setVideoFrameSize();
+      this.removeVideFrameTitle();
+    });
   }
 
   isLoaded() {
@@ -71,5 +71,10 @@ export default class Player {
   resetVideoFrameSize() {
     /* eslint-disable no-unused-expressions */
     this.getVideoFrame()?.style.removeProperty("width");
+  }
+
+  removeVideFrameTitle() {
+    const frame = this.getVideoFrame();
+    if (frame) frame.removeAttribute("title");
   }
 }
