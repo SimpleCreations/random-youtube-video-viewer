@@ -1,57 +1,61 @@
 import { EventEmitter } from "events";
-import sample from "lodash.sample";
 
 import YoutubeApi from "./YoutubeApi";
-import getSearchQuery from "./search-query/getSearchQuery";
+import { lookupVideos } from "./lookup";
 
 export default class Loader extends EventEmitter {
   #player;
-  #youtubeApi;
-  #searchQueryGenerationAlgorithm;
+  #youtubeApi = new YoutubeApi();
+  #lookupAlgorithm;
+  #foundVideosQueue = [];
 
   constructor(player) {
     super();
     this.#player = player;
-    this.#youtubeApi = new YoutubeApi();
   }
 
   setYoutubeApiKeys(apiKeys) {
     this.#youtubeApi.setApiKeys(apiKeys);
   }
 
-  setSearchQueryGenerationAlgorithm(searchQueryGenerationAlgorithm) {
-    this.#searchQueryGenerationAlgorithm = searchQueryGenerationAlgorithm;
+  setLookupAlgorithm(lookupAlgorithm) {
+    this.#lookupAlgorithm = lookupAlgorithm;
   }
 
   async loadNextVideo() {
     const videoId = await this.#getVideoId();
+    const aspectRatio = await this.#youtubeApi.getVideoAspectRatio(videoId);
     const link = "https://www.youtube.com/watch?v=" + videoId;
     this.#player.play(link);
     this.emit("videoReady", { link });
 
-    this.#player.setVideoAspectRatio(undefined);
-    this.#player.resetVideoFrameSize();
-    this.#updatePlayerVideoFrameSize(videoId);
+    if (aspectRatio) {
+      this.#player.setVideoAspectRatio(aspectRatio);
+      this.#player.setVideoFrameSize();
+    } else {
+      this.#player.setVideoAspectRatio(undefined);
+      this.#player.resetVideoFrameSize();
+    }
   }
 
   async #getVideoId() {
-    const searchQuery = await getSearchQuery(
-      this.#searchQueryGenerationAlgorithm
-    );
-    const searchResults = await this.#youtubeApi.getSearchResults(searchQuery);
-    if (!searchResults.length) return await this.#getVideoId();
+    if (!this.#foundVideosQueue.length) await this.#lookupMoreVideos();
 
-    const video = sample(searchResults);
+    const { video, searchQuery } = this.#foundVideosQueue.shift();
     this.emit("infoReady", { video, searchQuery });
 
     return video.videoId;
   }
 
-  async #updatePlayerVideoFrameSize(videoId) {
-    const aspectRatio = await this.#youtubeApi.getVideoAspectRatio(videoId);
-    if (aspectRatio) {
-      this.#player.setVideoAspectRatio(aspectRatio);
-      this.#player.setVideoFrameSize();
-    }
+  async #lookupMoreVideos() {
+    const { videos, searchQuery } = await lookupVideos(
+      this.#youtubeApi,
+      this.#lookupAlgorithm
+    );
+    if (!videos.length) return await this.#getVideoId();
+
+    this.#foundVideosQueue.push(
+      ...videos.map((video) => ({ video, searchQuery }))
+    );
   }
 }

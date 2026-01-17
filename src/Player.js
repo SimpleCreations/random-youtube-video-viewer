@@ -58,7 +58,7 @@ export default class Player {
   }
 
   setVideoFrameSize() {
-    if (this.#videoAspectRatio == null) return;
+    if (this.#player == null || this.#videoAspectRatio == null) return;
     const { width, height } = this.#player;
     if (this.#videoAspectRatio < width / height) {
       const frame = this.getVideoFrame();

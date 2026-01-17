@@ -32,11 +32,12 @@
               <dd>
                 <textarea id="api-keys" rows="5"></textarea>
               </dd>
-              <dt>Search query generation algorithm</dt>
+              <dt>Video lookup algorithm</dt>
               <dd>
-                <select id="query-generation-algorithm">
-                  <option value="NUMBERS" selected>Numbers</option>
-                  <option value="WIKIPEDIA_WORDS">Wikipedia words</option>
+                <select id="lookup-algorithm">
+                  <option value="VIDEO_IDS" selected>Video IDs</option>
+                  <option value="WIKIPEDIA">Wikipedia</option>
+                  <option value="ZERO_VIEW_YOUTUBE">Zero View YouTube</option>
                 </select>
               </dd>
             </dl>
@@ -54,7 +55,7 @@
                 >
               </dt>
               <dd id="title"></dd>
-              <dt>
+              <dt id="search-query-label">
                 Search query
                 <a
                   id="translate-search-query"

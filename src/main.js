@@ -7,9 +7,8 @@ import { YoutubeMissingApiKeysError } from "./YoutubeApi";
 
 const playerElement = document.querySelector("#player");
 const settingsElement = document.querySelector("#settings");
-const queryGenerationAlgorithmSelectElement = document.querySelector(
-  "#query-generation-algorithm"
-);
+const lookupAlgorithmSelectElement =
+  document.querySelector("#lookup-algorithm");
 const apiKeysFieldElement = document.querySelector("#api-keys");
 const nextButtonElement = document.querySelector("#next");
 const openOnYoutubeLinkElement = document.querySelector("#open-on-youtube");
@@ -28,8 +27,13 @@ const loader = new Loader(player);
 
 // Handle video info
 loader.on("infoReady", ({ video, searchQuery }) => {
-  searchQueryElement.textContent = searchQuery;
-  searchQueryTranslateLinkElement.href = getTranslateLink(searchQuery);
+  if (searchQuery) {
+    searchQueryElement.textContent = searchQuery;
+    searchQueryTranslateLinkElement.href = getTranslateLink(searchQuery);
+    spoilersElement.classList.remove("search-query-hidden");
+  } else {
+    spoilersElement.classList.add("search-query-hidden");
+  }
   titleElement.textContent = video.title;
   titleTranslateLinkElement.href = getTranslateLink(video.title);
 });
@@ -74,16 +78,19 @@ apiKeysFieldElement.addEventListener("change", () => {
 });
 
 // Handle search query generation algorithm update
-const queryGenerationAlgorithm = store.get(
-  "queryGenerationAlgorithm",
-  "NUMBERS"
+const supportedLookupAlgorithms = [...lookupAlgorithmSelectElement.options].map(
+  (option) => option.value
 );
-loader.setSearchQueryGenerationAlgorithm(queryGenerationAlgorithm);
-queryGenerationAlgorithmSelectElement.value = queryGenerationAlgorithm;
-queryGenerationAlgorithmSelectElement.addEventListener("change", () => {
-  const value = queryGenerationAlgorithmSelectElement.value;
-  loader.setSearchQueryGenerationAlgorithm(value);
-  store.set("queryGenerationAlgorithm", value);
+let lookupAlgorithm = store.get("lookupAlgorithm");
+if (!supportedLookupAlgorithms.includes(lookupAlgorithm)) {
+  lookupAlgorithm = "VIDEO_IDS";
+}
+loader.setLookupAlgorithm(lookupAlgorithm);
+lookupAlgorithmSelectElement.value = lookupAlgorithm;
+lookupAlgorithmSelectElement.addEventListener("change", () => {
+  const value = lookupAlgorithmSelectElement.value;
+  loader.setLookupAlgorithm(value);
+  store.set("lookupAlgorithm", value);
 });
 
 // Handle next video button click

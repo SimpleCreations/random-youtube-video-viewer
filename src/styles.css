@@ -145,6 +145,14 @@ details dd:last-child {
   right: 0;
 }
 
+#spoilers.search-query-hidden :is(#search-query-label, #search-query) {
+  display: none;
+}
+
+#spoilers.search-query-hidden #title {
+  margin-bottom: 0;
+}
+
 #api-keys {
   width: 100%;
   box-sizing: border-box;

@@ -322,10 +322,10 @@ lodash.sample@4.2.1:
   resolved "https://registry.yarnpkg.com/lodash.sample/-/lodash.sample-4.2.1.tgz#5e4291b0c753fa1abeb0aab8fb29df1b66f07f6d"
   integrity sha512-odCZufa8jYDBZQ+JOSePWRs+iApPdvIp3qAiKc9F22RdSCMLuUu60Jvgs2M6qMisKAeBZoumAkqDiGr9HDym/Q==
 
-lodash.sum@4.0.2:
-  version "4.0.2"
-  resolved "https://registry.yarnpkg.com/lodash.sum/-/lodash.sum-4.0.2.tgz#ad90e397965d803d4f1ff7aa5b2d0197f3b4637b"
-  integrity sha512-1GcLFsMpU0K7uGPjo5FePq0fNlL3sSTZtSWwQUxr9VL8T3xeJiprwbfjDptTUPtkB8cUBpAnMtvQpju5XXaBeA==
+lodash.shuffle@4.2.0:
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/lodash.shuffle/-/lodash.shuffle-4.2.0.tgz#145b5053cf875f6f5c2a33f48b6e9948c6ec7b4b"
+  integrity sha512-V/rTAABKLFjoecTZjKSv+A1ZomG8hZg8hlgeG6wwQVD9AGv+10zqqSf6mFq2tVA703Zd5R0YhSuSlXA+E/Ei+Q==
 
 mediaelement@4.2.16:
   version "4.2.16"
@@ -430,3 +430,8 @@ vite@6.3.5:
     tinyglobby "^0.2.13"
   optionalDependencies:
     fsevents "~2.3.3"
+
+weighted@1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/weighted/-/weighted-1.0.0.tgz#37c72fc2fa4dd39d85abfbbcc30ed6a61781b74d"
+  integrity sha512-d0actwV3zgtH73koFWida36KVz+hM1XaumMBTQI6ozr9zUgHiB4dWM+2wWcXe6cniyLW0iMBthuPN6XtSpPMVw==

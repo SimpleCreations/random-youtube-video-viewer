@@ -45,15 +45,14 @@ export default class YoutubeApi {
     return data;
   }
 
-  async getSearchResults(searchQuery) {
+  async getSearchResults(searchQuery, params) {
     const data = await this.#queryApi("search", {
       q: searchQuery,
       part: "snippet",
       type: "video",
-      order: "date",
       videoDimension: "2d",
       videoEmbeddable: true,
-      maxResults: 10,
+      ...params
     });
     return data["items"].map((item) => ({
       videoId: item["id"]["videoId"],
