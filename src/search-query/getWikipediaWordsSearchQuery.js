@@ -1,7 +1,7 @@
 import sample from "lodash.sample";
 import countBy from "lodash.countby";
 
-import { getSampleWeighted } from "../util";
+import { getSampleWeighted } from "../utils";
 import { WIKIPEDIAS, WIKIPEDIAS_ENTRIES } from "./wikipedias";
 import { MOST_FREQUENT_WORDS_BY_SCRIPT } from "./freqDictionary";
 

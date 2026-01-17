@@ -1,6 +1,6 @@
 import store from "store";
 
-import { getTranslateLink } from "./util";
+import { getTranslateLink } from "./utils";
 import Player from "./Player";
 import Loader, { MissingApiKeysError } from "./Loader";
 
