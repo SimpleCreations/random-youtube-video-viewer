@@ -2,7 +2,8 @@ import store from "store";
 
 import { getTranslateLink } from "./utils";
 import Player from "./Player";
-import Loader, { MissingApiKeysError } from "./Loader";
+import Loader from "./Loader";
+import { YoutubeMissingApiKeysError } from "./YoutubeApi";
 
 const playerElement = document.querySelector("#player");
 const settingsElement = document.querySelector("#settings");
@@ -26,11 +27,11 @@ const player = new Player(playerElement);
 const loader = new Loader(player);
 
 // Handle video info
-loader.on("infoReady", ({ title, searchQuery }) => {
+loader.on("infoReady", ({ video, searchQuery }) => {
   searchQueryElement.textContent = searchQuery;
   searchQueryTranslateLinkElement.href = getTranslateLink(searchQuery);
-  titleElement.textContent = title;
-  titleTranslateLinkElement.href = getTranslateLink(title);
+  titleElement.textContent = video.title;
+  titleTranslateLinkElement.href = getTranslateLink(video.title);
 });
 
 // Handle video link
@@ -58,7 +59,7 @@ document.addEventListener("click", ({ target }) => {
 
 // Handle API keys update
 const apiKeys = store.get("apiKeys", []);
-loader.setApiKeys(apiKeys);
+loader.setYoutubeApiKeys(apiKeys);
 apiKeysFieldElement.value = apiKeys.join("\n");
 apiKeysMissingElement.hidden = apiKeys.length > 0;
 apiKeysFieldElement.addEventListener("change", () => {
@@ -67,7 +68,7 @@ apiKeysFieldElement.addEventListener("change", () => {
     .split("\n")
     .map((key) => key.trim())
     .filter((key) => key.length > 0);
-  loader.setApiKeys(apiKeys);
+  loader.setYoutubeApiKeys(apiKeys);
   store.set("apiKeys", apiKeys);
   apiKeysMissingElement.hidden = apiKeys.length > 0;
 });
@@ -101,7 +102,7 @@ nextButtonElement.addEventListener("click", async () => {
     openOnYoutubeLinkElement.hidden = false;
     spoilersElement.hidden = false;
   } catch (error) {
-    if (error instanceof MissingApiKeysError) return;
+    if (error instanceof YoutubeMissingApiKeysError) return;
     throw error;
   } finally {
     nextButtonElement.disabled = false;
