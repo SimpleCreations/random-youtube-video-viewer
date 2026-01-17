@@ -31,8 +31,9 @@ export default class YoutubeApi {
     const data = await response.json();
 
     if (!response.ok) {
+      const errorReason = data["error"]?.["errors"]?.[0]?.["reason"];
       if (
-        data["error"]?.["errors"]?.[0]?.["reason"] === "quotaExceeded" &&
+        (errorReason === "quotaExceeded" || errorReason === "forbidden") &&
         this.#apiKeys.length > 1
       ) {
         this.#apiKeys = this.#apiKeys.filter((key) => key !== apiKey);
