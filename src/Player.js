@@ -29,7 +29,7 @@ export default class Player {
     this.setSize();
     this.#player.media.addEventListener("loadedmetadata", () => {
       this.setVideoFrameSize();
-      this.removeVideFrameTitle();
+      this.#removeVideFrameTitle();
     });
   }
 
@@ -53,7 +53,7 @@ export default class Player {
     this.setVideoFrameSize();
   }
 
-  getVideoFrame() {
+  #getVideoFrame() {
     return this.#playerElement.querySelector("iframe");
   }
 
@@ -61,7 +61,7 @@ export default class Player {
     if (this.#player == null || this.#videoAspectRatio == null) return;
     const { width, height } = this.#player;
     if (this.#videoAspectRatio < width / height) {
-      const frame = this.getVideoFrame();
+      const frame = this.#getVideoFrame();
       if (frame) frame.style.width = height * this.#videoAspectRatio + "px";
     } else {
       this.resetVideoFrameSize();
@@ -70,11 +70,11 @@ export default class Player {
 
   resetVideoFrameSize() {
     /* eslint-disable no-unused-expressions */
-    this.getVideoFrame()?.style.removeProperty("width");
+    this.#getVideoFrame()?.style.removeProperty("width");
   }
 
-  removeVideFrameTitle() {
-    const frame = this.getVideoFrame();
+  #removeVideFrameTitle() {
+    const frame = this.#getVideoFrame();
     if (frame) frame.removeAttribute("title");
   }
 }
