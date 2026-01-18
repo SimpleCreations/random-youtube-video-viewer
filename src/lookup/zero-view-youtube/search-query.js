@@ -38,7 +38,7 @@ export function getZeroViewYoutubeSearchQuery() {
         }
         case "TIME": {
           const { format = "HHmm" } = token;
-          const value = random(0, 24 * 60 * 60 * 1000);
+          const value = random(0, 24 * 60 * 60 * 1000 - 1);
           return dayjs(value).utc().format(format);
         }
         default:
