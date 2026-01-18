@@ -13,6 +13,9 @@ export default class Loader extends EventEmitter {
   }
 
   setLookupAlgorithm(lookupAlgorithm) {
+    if (lookupAlgorithm !== this.#lookupAlgorithm) {
+      this.#foundVideosQueue.length = 0;
+    }
     this.#lookupAlgorithm = lookupAlgorithm;
   }
 
@@ -40,7 +43,10 @@ export default class Loader extends EventEmitter {
       this.#youtubeApi,
       this.#lookupAlgorithm
     );
-    if (!videos.length) return await this.#getVideoId();
+    if (!videos.length) {
+      await this.#lookupMoreVideos();
+      return;
+    }
 
     this.#foundVideosQueue.push(
       ...videos.map((video) => ({ video, searchQuery }))
