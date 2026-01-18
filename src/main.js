@@ -99,12 +99,10 @@ nextButtonElement.addEventListener("click", async () => {
   openOnYoutubeLinkElement.hidden = true;
   spoilersElement.hidden = true;
   try {
+    await loader.loadNextVideo();
     if (!player.isLoaded()) {
-      await loader.loadNextVideo();
       player.load();
       nextButtonElement.textContent = "Next video";
-    } else {
-      await loader.loadNextVideo();
     }
     openOnYoutubeLinkElement.hidden = false;
     spoilersElement.hidden = false;

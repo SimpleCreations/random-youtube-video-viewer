@@ -18,14 +18,15 @@ export default class Player {
   }
 
   load() {
-    /* eslint-disable-next-line no-undef */
     this.#player = new MediaElementPlayer(this.#videoElement, {
+      autoplay: true,
       renderers: ["youtube_iframe"],
       youtube: {
         modestbranding: 1,
         autohide: 1,
       },
     });
+    this.#player.autoplay = true;
     this.setSize();
     this.#player.media.addEventListener("loadedmetadata", () => {
       this.setVideoFrameSize();
