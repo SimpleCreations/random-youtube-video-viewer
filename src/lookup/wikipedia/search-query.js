@@ -4,6 +4,7 @@ import sampleWeighted from "weighted";
 
 import { WIKIPEDIAS_ENTRIES, WIKIPEDIAS_WEIGHTS } from "./wikipedias";
 import { MOST_FREQUENT_WORDS_BY_SCRIPT } from "./freq-dictionary";
+import { getScriptCode, getWordSegmenter } from "./intl";
 
 const EDIT_BUTTONS_REGEX = /\[.+ \| .+]/g;
 const SHORT_LATIN_WORD_REGEX = /^\p{Script=Latin}{0,2}$/u;
@@ -22,8 +23,10 @@ async function queryWikipediaApi(languageCode, params) {
 }
 
 export async function getWikipediaSearchQuery() {
-  const [languageCode, { script, words: numberOfWordsToSelect }] =
-    sampleWeighted(WIKIPEDIAS_ENTRIES, WIKIPEDIAS_WEIGHTS);
+  const [languageCode, { words: numberOfWordsToSelect }] = sampleWeighted(
+    WIKIPEDIAS_ENTRIES,
+    WIKIPEDIAS_WEIGHTS
+  );
 
   const queryData = await queryWikipediaApi(languageCode, {
     action: "query",
@@ -51,18 +54,19 @@ export async function getWikipediaSearchQuery() {
   }
 
   const text = dummy.textContent.replace(EDIT_BUTTONS_REGEX, "");
-  const segmenter = new Intl.Segmenter(languageCode, { granularity: "word" });
-  const words = [...segmenter.segment(text)]
+  const words = [...getWordSegmenter(languageCode).segment(text)]
     .filter(({ isWordLike }) => isWordLike)
     .map(({ segment }) => segment.toLocaleLowerCase(languageCode));
   if (!words.length) return await getWikipediaSearchQuery();
 
   let selectedWordIndex;
-  const frequentWords = MOST_FREQUENT_WORDS_BY_SCRIPT[script];
+  const scriptCode = getScriptCode(languageCode);
+  const frequentWords = MOST_FREQUENT_WORDS_BY_SCRIPT[scriptCode];
   if (frequentWords) {
     const wordsEntries = Array.from(words.entries());
     let filteredWordsEntries = wordsEntries.filter(([, word]) => {
-      if (script === "latin" && SHORT_LATIN_WORD_REGEX.test(word)) return false;
+      if (scriptCode === "Latn" && SHORT_LATIN_WORD_REGEX.test(word))
+        return false;
       return !frequentWords.has(word);
     });
     if (filteredWordsEntries.length === 0) filteredWordsEntries = wordsEntries;

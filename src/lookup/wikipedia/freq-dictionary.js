@@ -1,7 +1,7 @@
 import mapValues from "lodash/mapValues";
 import groupBy from "lodash/groupBy";
 
-import { WIKIPEDIAS } from "./wikipedias";
+import { getScriptCode } from "./intl";
 
 // prettier-ignore
 export const MOST_FREQUENT_WORDS_BY_LANGUAGE = {
@@ -39,9 +39,8 @@ export const MOST_FREQUENT_WORDS_BY_LANGUAGE = {
 };
 
 export const MOST_FREQUENT_WORDS_BY_SCRIPT = mapValues(
-  groupBy(
-    Object.entries(MOST_FREQUENT_WORDS_BY_LANGUAGE),
-    ([code]) => WIKIPEDIAS[code].script
+  groupBy(Object.entries(MOST_FREQUENT_WORDS_BY_LANGUAGE), ([languageCode]) =>
+    getScriptCode(languageCode)
   ),
   (entries) => new Set(entries.map(([, words]) => words).flat())
 );
