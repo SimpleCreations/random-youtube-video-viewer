@@ -49,7 +49,7 @@ export async function getWikipediaSearchQuery() {
     "sup, sub, h1, h2, h3, h4, h5, h6, ol, ul, table, style, .noprint, .nomobile, .plainlinks, .toc, .thumb, .infobox, .reflist, .purl, .navbox, .hatnote"
   );
   for (const el of toRemove) {
-    el.parentElement?.removeChild(el);
+    el.remove();
   }
 
   const text = dummy.textContent;
@@ -79,21 +79,13 @@ export async function getWikipediaSearchQuery() {
     selectedWordIndex = words.indexOf(selectedWord);
   }
 
-  const selectedWords = words.slice(
-    selectedWordIndex,
-    selectedWordIndex + numberOfWordsToSelect
-  );
-  const elementsLeft = numberOfWordsToSelect - selectedWords.length;
-  if (elementsLeft > 0) {
-    selectedWords.unshift(
-      ...words.slice(
-        Math.max(selectedWordIndex - elementsLeft, 0),
-        selectedWordIndex
-      )
-    );
-  }
-
-  return selectedWords.join(" ");
+  return words
+    .slice(
+      Math.max(selectedWordIndex - (numberOfWordsToSelect - 1), 0),
+      selectedWordIndex + numberOfWordsToSelect
+    )
+    .slice(-numberOfWordsToSelect)
+    .join(" ");
 }
 
 function wordFrequencyToWeight(freq) {
