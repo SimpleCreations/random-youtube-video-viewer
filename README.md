@@ -6,25 +6,33 @@ It uses YouTube search API with randomly generated search queries to make the st
 
 ## Try it out
 
-https://4wtrnw-5173.csb.app/
+https://random-youtube-video-viewer.netlify.app/
 
 ## Getting started
 
 1. Create a [YouTube Data API v3 key](https://developers.google.com/youtube/registering_an_application).
 
-   **Note:** the player uses at least 101 quota points per view, allowing to watch not more than 100 videos per day per API key. If you plan to watch more, consider creating several API keys from multiple Google accounts.
+   **Note:** with some lookup algorithms, the app may use up to a few hundred quota points per video, while only 10000 points are available per day per API key. If you end up running out of quota quickly, consider creating several API keys using multiple Google accounts.
 
 2. Paste the key(s) into the text box under the Settings menu.
 
 ## Features
 
 - Uses [mediaelement](https://github.com/mediaelement/mediaelement) (along with some CSS tricks) instead of the native YouTube player to hide the title and other information about the video.
-- Provides different ways of generating search terms.
-
-  - **Numbers** — uses a random string of multiple numbers as a search term.
-  - **Wikipedia words** — uses Wikipedia API to fetch a random article in a random language and takes a random word or a sequence of words from it to use as a search term.
-
 - Allows to reveal information about the video under the Spoilers toggle and provides a link to the video on YouTube.
+- Provides several lookup algorithms — different approaches to finding random videos.
+
+  - **Video IDs** (default). Searches for videos with IDs matching randomly generated prefixes. This algorithm will produce the most evenly distributed random results, without specific characteristics or direction. Great for a true “random YouTube” feel.
+
+    **Quota usage**: ~14 points per video.
+
+  - **Wikipedia**. Uses words and phrases found in random Wikipedia articles as search queries. This algorithm will generally produce videos from a variety of different regions, and each video will often be about a specific topic. Great for discovering content and exploring different cultures.
+
+    **Quota usage**: ~120 points per video.
+
+  - **Zero View YouTube**. Inspired by [Petit Tube](https://petittube.com/) — searches for video titles containing common video file names used by digital cameras and other software. The results will be skewed towards home videos or other videos uploaded directly after having been recorded. Will rarely include edited or professionally produced videos.
+
+    **Quota usage**: ~105 points per video.
 
 ## To do
 
