@@ -49,7 +49,6 @@ export async function getWikipediaSearchQuery() {
     "sup, sub, h1, h2, h3, h4, h5, h6, ol, ul, table, style, .noprint, .nomobile, .plainlinks, .toc, .thumb, .infobox, .reflist, .purl, .navbox, .hatnote"
   );
   for (const el of toRemove) {
-    /* eslint-disable no-unused-expressions */
     el.parentElement?.removeChild(el);
   }
 

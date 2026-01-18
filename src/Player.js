@@ -69,7 +69,6 @@ export default class Player {
   }
 
   resetVideoFrameSize() {
-    /* eslint-disable no-unused-expressions */
     this.#getVideoFrame()?.style.removeProperty("width");
   }
 
