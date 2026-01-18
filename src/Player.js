@@ -13,11 +13,7 @@ export default class Player {
     this.#videoElement = playerElement.querySelector("video");
   }
 
-  setVideoAspectRatio(videoAspectRatio) {
-    this.#videoAspectRatio = videoAspectRatio;
-  }
-
-  load() {
+  #load() {
     this.#player = new MediaElementPlayer(this.#videoElement, {
       renderers: ["youtube_iframe"],
       youtube: {
@@ -25,50 +21,57 @@ export default class Player {
         autohide: 1,
       },
     });
-    this.setSize();
+    this.updateSize();
 
     this.#player.media.addEventListener("loadedmetadata", () => {
-      this.setVideoFrameSize();
+      this.#updateVideoFrameSize();
       this.#removeVideFrameTitle();
       this.#player.play();
     });
   }
 
-  isLoaded() {
-    return !!this.#player;
-  }
-
   play(link) {
-    if (this.isLoaded()) {
+    if (!this.#player) {
+      this.#videoElement.querySelector("source").src = link;
+      this.#load();
+    } else {
       this.#player.setSrc(link);
       this.#player.setCurrentTime(0);
-    } else {
-      this.#videoElement.querySelector("source").src = link;
     }
   }
 
-  setSize() {
+  setVideoAspectRatio(videoAspectRatio) {
+    this.#videoAspectRatio = videoAspectRatio;
+    this.#updateVideoFrameSize();
+  }
+
+  updateSize() {
+    if (!this.#player) return;
     const { offsetWidth, offsetHeight } = this.#playerElement;
     this.#player.setPlayerSize(offsetWidth, offsetHeight);
-    this.setVideoFrameSize();
+    this.#updateVideoFrameSize();
   }
 
   #getVideoFrame() {
     return this.#playerElement.querySelector("iframe");
   }
 
-  setVideoFrameSize() {
-    if (!this.isLoaded() || !this.#videoAspectRatio) return;
-    const { width, height } = this.#player;
-    if (this.#videoAspectRatio < width / height) {
-      const frame = this.#getVideoFrame();
-      if (frame) frame.style.width = height * this.#videoAspectRatio + "px";
+  #updateVideoFrameSize() {
+    if (!this.#player || !this.#videoAspectRatio) return;
+    if (this.#videoAspectRatio) {
+      const { width, height } = this.#player;
+      if (this.#videoAspectRatio < width / height) {
+        const frame = this.#getVideoFrame();
+        if (frame) frame.style.width = height * this.#videoAspectRatio + "px";
+      } else {
+        this.#resetVideoFrameSize();
+      }
     } else {
-      this.resetVideoFrameSize();
+      this.#resetVideoFrameSize();
     }
   }
 
-  resetVideoFrameSize() {
+  #resetVideoFrameSize() {
     this.#getVideoFrame()?.style.removeProperty("width");
   }
 

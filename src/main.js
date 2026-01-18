@@ -23,10 +23,10 @@ const apiKeysMissingElement = document.querySelector("#api-keys-missing");
 
 // Initialize Player and Loader
 const player = new Player(playerElement);
-const loader = new Loader(player);
+const loader = new Loader();
 
 // Handle video info
-loader.on("infoReady", ({ video, searchQuery }) => {
+loader.on("videoInfoReady", ({ video, searchQuery }) => {
   nextButtonElement.textContent = "Next video";
   openOnYoutubeLinkElement.hidden = false;
   spoilersElement.hidden = false;
@@ -42,7 +42,7 @@ loader.on("infoReady", ({ video, searchQuery }) => {
 });
 
 // Handle video link
-loader.on("videoReady", ({ link }) => {
+loader.on("videoLinkReady", ({ link }) => {
   openOnYoutubeLinkElement.href = link;
 });
 
@@ -71,7 +71,6 @@ apiKeysFieldElement.value = apiKeys.join("\n");
 apiKeysMissingElement.hidden = apiKeys.length > 0;
 apiKeysFieldElement.addEventListener("change", () => {
   const apiKeys = apiKeysFieldElement.value
-    .trim()
     .split("\n")
     .map((key) => key.trim())
     .filter((key) => key.length > 0);
@@ -100,8 +99,9 @@ lookupAlgorithmSelectElement.addEventListener("change", () => {
 nextButtonElement.addEventListener("click", async () => {
   nextButtonElement.disabled = true;
   try {
-    await loader.loadNextVideo();
-    if (!player.isLoaded()) player.load();
+    const { link, aspectRatio } = await loader.getNextVideo();
+    player.play(link);
+    player.setVideoAspectRatio(aspectRatio);
   } catch (error) {
     if (error instanceof YoutubeMissingApiKeysError) return;
     throw error;
@@ -112,5 +112,5 @@ nextButtonElement.addEventListener("click", async () => {
 
 // Handle window resize
 window.addEventListener("resize", () => {
-  if (player.isLoaded()) player.setSize();
+  player.updateSize();
 });
