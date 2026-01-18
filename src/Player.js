@@ -19,30 +19,29 @@ export default class Player {
 
   load() {
     this.#player = new MediaElementPlayer(this.#videoElement, {
-      autoplay: true,
       renderers: ["youtube_iframe"],
       youtube: {
         modestbranding: 1,
         autohide: 1,
       },
     });
-    this.#player.autoplay = true;
     this.setSize();
+
     this.#player.media.addEventListener("loadedmetadata", () => {
       this.setVideoFrameSize();
       this.#removeVideFrameTitle();
+      this.#player.play();
     });
   }
 
   isLoaded() {
-    return this.#player != null;
+    return !!this.#player;
   }
 
   play(link) {
     if (this.isLoaded()) {
       this.#player.setSrc(link);
       this.#player.setCurrentTime(0);
-      this.#player.play();
     } else {
       this.#videoElement.querySelector("source").src = link;
     }
@@ -59,7 +58,7 @@ export default class Player {
   }
 
   setVideoFrameSize() {
-    if (this.#player == null || this.#videoAspectRatio == null) return;
+    if (!this.isLoaded() || !this.#videoAspectRatio) return;
     const { width, height } = this.#player;
     if (this.#videoAspectRatio < width / height) {
       const frame = this.#getVideoFrame();

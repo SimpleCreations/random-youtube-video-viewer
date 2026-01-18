@@ -27,6 +27,9 @@ const loader = new Loader(player);
 
 // Handle video info
 loader.on("infoReady", ({ video, searchQuery }) => {
+  nextButtonElement.textContent = "Next video";
+  openOnYoutubeLinkElement.hidden = false;
+  spoilersElement.hidden = false;
   if (searchQuery) {
     searchQueryElement.textContent = searchQuery;
     searchQueryTranslateLinkElement.href = getTranslateLink(searchQuery);
@@ -96,16 +99,9 @@ lookupAlgorithmSelectElement.addEventListener("change", () => {
 // Handle next video button click
 nextButtonElement.addEventListener("click", async () => {
   nextButtonElement.disabled = true;
-  openOnYoutubeLinkElement.hidden = true;
-  spoilersElement.hidden = true;
   try {
     await loader.loadNextVideo();
-    if (!player.isLoaded()) {
-      player.load();
-      nextButtonElement.textContent = "Next video";
-    }
-    openOnYoutubeLinkElement.hidden = false;
-    spoilersElement.hidden = false;
+    if (!player.isLoaded()) player.load();
   } catch (error) {
     if (error instanceof YoutubeMissingApiKeysError) return;
     throw error;
