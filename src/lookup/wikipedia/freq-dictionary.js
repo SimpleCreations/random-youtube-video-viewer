@@ -1,5 +1,5 @@
-import mapValues from "lodash.mapvalues";
-import groupBy from "lodash.groupby";
+import mapValues from "lodash/mapValues";
+import groupBy from "lodash/groupBy";
 
 import { WIKIPEDIAS } from "./wikipedias";
 

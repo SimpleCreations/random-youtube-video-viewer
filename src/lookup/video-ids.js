@@ -1,5 +1,5 @@
-import sample from "lodash.sample";
-import shuffle from "lodash.shuffle";
+import sample from "lodash/sample";
+import shuffle from "lodash/shuffle";
 
 const PREFIX_CHARACTERS = "abcdefghijklmnopqrstuvwxyz0123456789_".split("");
 const PREFIX_START_CHARACTERS = PREFIX_CHARACTERS.filter((c) => c !== "_");

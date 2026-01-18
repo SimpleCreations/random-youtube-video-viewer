@@ -1,5 +1,5 @@
-import sample from "lodash.sample";
-import countBy from "lodash.countby";
+import sample from "lodash/sample";
+import countBy from "lodash/countBy";
 import sampleWeighted from "weighted";
 
 import { WIKIPEDIAS_ENTRIES, WIKIPEDIAS_WEIGHTS } from "./wikipedias";

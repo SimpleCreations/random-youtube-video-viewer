@@ -1,4 +1,4 @@
-import sample from "lodash.sample";
+import sampleSize from "lodash/sampleSize";
 
 import { getWikipediaSearchQuery } from "./search-query";
 
@@ -9,7 +9,6 @@ export async function lookupWikipediaVideos(youtubeApi) {
     order: "date",
     maxResults: 10,
   });
-  if (!searchResults.length) return [];
 
-  return { videos: [sample(searchResults)], searchQuery };
+  return { videos: sampleSize(searchResults, 1), searchQuery };
 }

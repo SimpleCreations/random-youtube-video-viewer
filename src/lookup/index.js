@@ -1,5 +1,6 @@
 import { lookupVideoIdsVideos } from "./video-ids";
 import { lookupWikipediaVideos } from "./wikipedia";
+import { lookupZeroViewYoutubeVideos } from "./zero-view-youtube";
 
 export async function lookupVideos(youtubeApi, algorithm) {
   switch (algorithm) {
@@ -8,7 +9,7 @@ export async function lookupVideos(youtubeApi, algorithm) {
     case "WIKIPEDIA":
       return await lookupWikipediaVideos(youtubeApi);
     case "ZERO_VIEW_YOUTUBE":
-      throw new Error("Unreachable code");
+      return await lookupZeroViewYoutubeVideos(youtubeApi);
     default:
       throw new Error("Unreachable code");
   }

@@ -1,4 +1,4 @@
-import sample from "lodash.sample";
+import sample from "lodash/sample";
 import { decodeHTML } from "entities";
 
 export default class YoutubeApi {
