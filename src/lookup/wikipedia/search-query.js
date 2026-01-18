@@ -5,6 +5,9 @@ import sampleWeighted from "weighted";
 import { WIKIPEDIAS_ENTRIES, WIKIPEDIAS_WEIGHTS } from "./wikipedias";
 import { MOST_FREQUENT_WORDS_BY_SCRIPT } from "./freq-dictionary";
 
+const EDIT_BUTTONS_REGEX = /\[.+ \| .+]/g;
+const SHORT_LATIN_WORD_REGEX = /^\p{Script=Latin}{0,2}$/u;
+
 async function queryWikipediaApi(languageCode, params) {
   const response = await fetch(
     `https://${languageCode}.wikipedia.org/w/api.php?` +
@@ -18,16 +21,11 @@ async function queryWikipediaApi(languageCode, params) {
   return await response.json();
 }
 
-const WORD_REGEX = /[\p{L}\p{M}]+/gu;
-const SHORT_LATIN_WORD_REGEX = /^\p{Script=Latin}{0,2}$/u;
-
 export async function getWikipediaSearchQuery() {
-  const [code, { script, words: numberOfWordsToSelect }] = sampleWeighted(
-    WIKIPEDIAS_ENTRIES,
-    WIKIPEDIAS_WEIGHTS
-  );
+  const [languageCode, { script, words: numberOfWordsToSelect }] =
+    sampleWeighted(WIKIPEDIAS_ENTRIES, WIKIPEDIAS_WEIGHTS);
 
-  const queryData = await queryWikipediaApi(code, {
+  const queryData = await queryWikipediaApi(languageCode, {
     action: "query",
     generator: "random",
     grnnamespace: 0,
@@ -36,7 +34,7 @@ export async function getWikipediaSearchQuery() {
   });
   const pageId = +Object.keys(queryData["query"]["pages"])[0];
 
-  const parseData = await queryWikipediaApi(code, {
+  const parseData = await queryWikipediaApi(languageCode, {
     action: "parse",
     pageid: pageId,
     prop: "text",
@@ -52,9 +50,12 @@ export async function getWikipediaSearchQuery() {
     el.remove();
   }
 
-  const text = dummy.textContent;
-  const words = text.match(WORD_REGEX);
-  if (words == null) return await getWikipediaSearchQuery();
+  const text = dummy.textContent.replace(EDIT_BUTTONS_REGEX, "");
+  const segmenter = new Intl.Segmenter(languageCode, { granularity: "word" });
+  const words = [...segmenter.segment(text)]
+    .filter(({ isWordLike }) => isWordLike)
+    .map(({ segment }) => segment.toLocaleLowerCase(languageCode));
+  if (!words.length) return await getWikipediaSearchQuery();
 
   let selectedWordIndex;
   const frequentWords = MOST_FREQUENT_WORDS_BY_SCRIPT[script];
@@ -62,7 +63,7 @@ export async function getWikipediaSearchQuery() {
     const wordsEntries = Array.from(words.entries());
     let filteredWordsEntries = wordsEntries.filter(([, word]) => {
       if (script === "latin" && SHORT_LATIN_WORD_REGEX.test(word)) return false;
-      return !frequentWords.has(word.toLowerCase());
+      return !frequentWords.has(word);
     });
     if (filteredWordsEntries.length === 0) filteredWordsEntries = wordsEntries;
     [selectedWordIndex] = sample(filteredWordsEntries);
