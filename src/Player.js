@@ -42,7 +42,6 @@ export default class Player {
 
   setVideoAspectRatio(videoAspectRatio) {
     this.#videoAspectRatio = videoAspectRatio;
-    this.#updateVideoFrameSize();
   }
 
   updateSize() {
